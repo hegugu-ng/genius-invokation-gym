@@ -169,13 +169,12 @@ class KantenSenmyouBlessing(TalentEntity):
                 self.active
                 and top_msg.sender_id == self.player_id
                 and top_msg.target_pos == self.char_pos
-            ):
-                if top_msg.required_cost[ElementType.ANY] > 0:
-                    top_msg.required_cost[ElementType.ANY] -= 1
-                    updated = True
-                    if not top_msg.simulate:
-                        self.active = False
-                        self.triggered_in_a_round = 1
+            ) and top_msg.required_cost[ElementType.ANY] > 0:
+                top_msg.required_cost[ElementType.ANY] -= 1
+                updated = True
+                if not top_msg.simulate:
+                    self.active = False
+                    self.triggered_in_a_round = 1
 
         elif isinstance(top_msg, RoundEndMsg):
             top_msg = cast(RoundEndMsg, top_msg)
@@ -185,15 +184,17 @@ class KantenSenmyouBlessing(TalentEntity):
 
         elif isinstance(top_msg, DealDamageMsg):
             top_msg = cast(DealDamageMsg, top_msg)
-            if top_msg.attacker == (self.player_id, self.char_pos):
-                if top_msg.targets[0][2] == ElementType.CRYO:
-                    top_msg.targets[0] = (
-                        top_msg.targets[0][0],
-                        top_msg.targets[0][1],
-                        top_msg.targets[0][2],
-                        top_msg.targets[0][3] + 1,
-                    )
-                    updated = True
+            if (
+                top_msg.attacker == (self.player_id, self.char_pos)
+                and top_msg.targets[0][2] == ElementType.CRYO
+            ):
+                top_msg.targets[0] = (
+                    top_msg.targets[0][0],
+                    top_msg.targets[0][1],
+                    top_msg.targets[0][2],
+                    top_msg.targets[0][3] + 1,
+                )
+                updated = True
 
         if updated:
             top_msg.responded_entities.append(self._uuid)

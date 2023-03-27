@@ -7,9 +7,7 @@ from classes.enums import ElementType
 
 def strip_content(content: str):
     content = content.replace("</color>", "").replace("\\n", "")
-    # Use regexp to replace all the color tags
-    content = re.sub(r"<color=#([0-9a-fA-F]{8})>", "", content)
-    return content
+    return re.sub(r"<color=#([0-9a-fA-F]{8})>", "", content)
 
 
 def get_equipments(equipment_type: str):
@@ -43,13 +41,10 @@ _WEAPON_COST_MAP = {
 
 
 def print_weapon(weapon):
-    costs = {}
-    costs[_WEAPON_COST_MAP[weapon["cost_type1_icon"]]] = int(weapon["cost_num1"])
+    costs = {_WEAPON_COST_MAP[weapon["cost_type1_icon"]]: int(weapon["cost_num1"])}
     if weapon["cost_num2"]:
         costs[_WEAPON_COST_MAP[weapon["cost_type2_icon"]]] = int(weapon["cost_num2"])
-    cost_str = ""
-    for elem, val in costs.items():
-        cost_str += f"ElementType.{elem}: {val}"
+    cost_str = "".join(f"ElementType.{elem}: {val}" for elem, val in costs.items())
     cost_str = "{" + cost_str + "}"
     weapon_str = weapon["name"].replace(" ", "").replace("'", "")
     weapon_type_str: str = weapon["action_card_tags"][1]["text"]

@@ -208,10 +208,11 @@ class AttackOnlyAgent(Agent):
                 character_card = get_character_card("Kamisato Ayaka")
                 character_element = character_card.element_type
                 current_dice = player_info.dice_zone
-                reroll_dice_idx = []
-                for k, element_type in enumerate(current_dice):
-                    if element_type not in [character_element, ElementType.OMNI]:
-                        reroll_dice_idx.append(k)
+                reroll_dice_idx = [
+                    k
+                    for k, element_type in enumerate(current_dice)
+                    if element_type not in [character_element, ElementType.OMNI]
+                ]
                 return RollDiceAction(dice_idx=reroll_dice_idx)
             elif game_info.phase == GamePhase.PLAY_CARDS:
                 player_info = game_info.get_player_info()
@@ -298,11 +299,8 @@ class AttackOnlyAgent(Agent):
                     )
                     if len(dice_idx) > 0:
                         skill_name = normal_attack.name
-                if not dice_idx:
-                    # No skill applicable
-                    return DeclareEndAction()
-                else:
-                    return UseSkillAction(
+                return (
+                    UseSkillAction(
                         user_position=active_pos,
                         skill_name=skill_name,
                         dice_idx=dice_idx,
@@ -313,7 +311,9 @@ class AttackOnlyAgent(Agent):
                             )
                         ],
                     )
-
+                    if dice_idx
+                    else DeclareEndAction()
+                )
             elif game_info.phase == GamePhase.ROUND_END:
                 player_info = game_info.get_player_info()
                 active_pos = player_info.active_character_position
@@ -349,10 +349,11 @@ class NoAttackAgent(Agent):
                 character_card = get_character_card("Kamisato Ayaka")
                 character_element = character_card.element_type
                 current_dice = player_info.dice_zone
-                reroll_dice_idx = []
-                for k, element_type in enumerate(current_dice):
-                    if element_type not in [character_element, ElementType.OMNI]:
-                        reroll_dice_idx.append(k)
+                reroll_dice_idx = [
+                    k
+                    for k, element_type in enumerate(current_dice)
+                    if element_type not in [character_element, ElementType.OMNI]
+                ]
                 return RollDiceAction(dice_idx=reroll_dice_idx)
             elif game_info.phase in [GamePhase.PLAY_CARDS, GamePhase.ROUND_END]:
                 player_info = game_info.get_player_info()

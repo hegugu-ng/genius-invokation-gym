@@ -84,8 +84,7 @@ class PlayerArea(BaseZone):
 
     @property
     def background_characters(self):
-        active_pos_val = self.get_active_character_position().value
-        if active_pos_val:
+        if active_pos_val := self.get_active_character_position().value:
             return [
                 self.character_zones[(active_pos_val + 1) % 3],
                 self.character_zones[(active_pos_val + 2) % 3],
@@ -377,7 +376,7 @@ class DiceZone(BaseZone):
         return {
             "length": len(self._dice),
             "items": self._dice
-            if viewer_id == self._parent.player_id or viewer_id == 0
+            if viewer_id in [self._parent.player_id, 0]
             else None,
         }
 
@@ -500,19 +499,17 @@ class CharacterZone(BaseZone):
         for entity in entities:
             if entity is None:
                 continue
-            updated = entity.msg_handler(msg_queue)
-            if updated:
+            if updated := entity.msg_handler(msg_queue):
                 return True
 
         # Remove
         if isinstance(top_msg, RoundEndMsg):
-            invalid_idxes = []
-            for idx, status in enumerate(self.status):
-                if (
-                    status.remaining_round == 0 or status.remaining_usage == 0
-                ) and status.active == False:
-                    # Remove this status
-                    invalid_idxes.append(idx)
+            invalid_idxes = [
+                idx
+                for idx, status in enumerate(self.status)
+                if (status.remaining_round == 0 or status.remaining_usage == 0)
+                and status.active == False
+            ]
             invalid_idxes.reverse()
             for idx in invalid_idxes:
                 self.status.pop(idx)

@@ -97,10 +97,7 @@ class Game:
                 target=(active_player, action.position),
             )
             self.msg_queue.put(msg)
-            if active_character is not None:
-                change = active_character.character.alive
-            else:
-                change = True
+            change = True if active_character is None else active_character.character.alive
             msg = AfterChangingCharacterMsg(
                 sender_id=active_player,
                 target=(active_player, action.position),
@@ -233,9 +230,12 @@ class Game:
                     self.active_player = ~self.active_player
                 else:
                     opponent_ended = self.player_area[~self.active_player].declare_end
-                    if top_msg.change_active_player and not opponent_ended:
-                        if self.active_player == top_msg.sender_id:
-                            self.active_player = ~self.active_player
+                    if (
+                        top_msg.change_active_player
+                        and not opponent_ended
+                        and self.active_player == top_msg.sender_id
+                    ):
+                        self.active_player = ~self.active_player
                 # TODO: Other impact on the game FSM
                 self.msg_queue.get()
                 if isinstance(top_msg, CharacterDiedMsg):
@@ -243,10 +243,7 @@ class Game:
                     # TODO: Determine whether game ends
                     # Wait for the player to change character
                     self.active_player = top_msg.target[0]
-                    char_died = top_msg.target[0]
-                    # Wait for player to select the next active character
-                    return char_died
-
+                    return top_msg.target[0]
         return False
 
     def get_zones(self, zones: List[Tuple[PlayerID, RegionType]]):
@@ -263,26 +260,20 @@ class Game:
             if self.status == GameStatus.INITIALIZING:
                 if self.phase == GamePhase.CHANGE_CARD:
                     self.active_player = ~self.active_player
-                    if self.active_player != self.first_move_player:
-                        # Wait for the other player to change cards
-                        break
-                    else:
+                    if self.active_player == self.first_move_player:
                         # Both players have changed their cards
                         self.phase = GamePhase.SELECT_ACTIVE_CHARACTER
-                        # Wait for players to select active character
-                        break
-
+                    # Wait for the other player to change cards
+                    break
                 elif self.phase == GamePhase.SELECT_ACTIVE_CHARACTER:
                     self.process_msg_queue()  # The active character will be assigned
 
-                    # self.active_player = ~self.active_player
                     if self.active_player != self.first_move_player:
                         break
-                    else:
-                        # Both players have selected their character
-                        # Finish initialization step
-                        self.status = GameStatus.RUNNING
-                        self.phase = GamePhase.ROUND_BEGIN
+                    # Both players have selected their character
+                    # Finish initialization step
+                    self.status = GameStatus.RUNNING
+                    self.phase = GamePhase.ROUND_BEGIN
 
             elif self.status == GameStatus.RUNNING:
                 if self.phase == GamePhase.ROUND_BEGIN:
@@ -311,15 +302,11 @@ class Game:
                         break
                     # This player has run out of reroll chances
                     self.active_player = ~self.active_player
-                    if self.active_player != self.first_move_player:
-                        # Wait for the second player to reroll dice
-                        break
-                    else:
+                    if self.active_player == self.first_move_player:
                         # Both players have rerolled dices
                         self.phase = GamePhase.PLAY_CARDS
-                        # Wait for first_move_player to take action
-                        break
-
+                    # Wait for the second player to reroll dice
+                    break
                 elif self.phase == GamePhase.PLAY_CARDS:
                     # Possible actions: UseCard, ElementalTuning, UseSkill, ChangeCharacter, DeclareEnd
                     char_died = self.process_msg_queue()
@@ -336,18 +323,17 @@ class Game:
                             self.winner = ~current_player
                         break
                     if (
-                        self.player_area[PlayerID.PLAYER1].declare_end
-                        and self.player_area[PlayerID.PLAYER2].declare_end
+                        not self.player_area[PlayerID.PLAYER1].declare_end
+                        or not self.player_area[PlayerID.PLAYER2].declare_end
                     ):
-                        # Both players have declared end
-                        self.phase = GamePhase.ROUND_END
-                        self.active_player = self.first_move_player
-                        self.msg_queue.put(
-                            RoundEndMsg(first_move_player=self.first_move_player)
-                        )
-                    else:
                         break
 
+                    # Both players have declared end
+                    self.phase = GamePhase.ROUND_END
+                    self.active_player = self.first_move_player
+                    self.msg_queue.put(
+                        RoundEndMsg(first_move_player=self.first_move_player)
+                    )
                 elif self.phase == GamePhase.ROUND_END:
                     if self.msg_queue.qsize() > 0:
                         char_died = self.process_msg_queue()
@@ -388,13 +374,7 @@ class GameInfo:
     def get_player_info(self, player_id: Optional[PlayerID] = None):
         if player_id is None:
             player_id = self.active_player
-        if player_id == PlayerID.PLAYER1:
-            return self.player1
-        else:
-            return self.player2
+        return self.player1 if player_id == PlayerID.PLAYER1 else self.player2
 
     def get_opponent_info(self):
-        if self.active_player == PlayerID.PLAYER1:
-            return self.player2
-        else:
-            return self.player1
+        return self.player2 if self.active_player == PlayerID.PLAYER1 else self.player1

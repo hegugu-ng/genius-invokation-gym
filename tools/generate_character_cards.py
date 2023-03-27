@@ -40,7 +40,7 @@ CHARACTER_NAME2ID: dict[str, int] = {}
 
 
 def register_character_card(card: CharacterCard, override: bool = False):
-    if override is False and card.id in CHARACTER_CARDS:
+    if not override and card.id in CHARACTER_CARDS:
         raise ValueError(
             f"Character card {card.id} already exists, use override=True to override it, or use silent=True to silence this warning"
         )
@@ -50,7 +50,7 @@ def register_character_card(card: CharacterCard, override: bool = False):
 
 
 def register_character_skill(skill: CharacterSkill, override: bool = False):
-    if override is False and skill.id in CHARACTER_SKILLS:
+    if not override and skill.id in CHARACTER_SKILLS:
         raise ValueError(
             f"Character skill {skill.id} already exists, use override=True to override it, or use silent=True to silence this warning"
         )
@@ -153,11 +153,9 @@ def _process_card(config: dict):
         resource=config["resource"],
         skills=skills,
         max_power=max(
-            [
-                skill.costs[ElementType.POWER]
-                for skill in skills
-                if ElementType.POWER in skill.costs.keys()
-            ]
+            skill.costs[ElementType.POWER]
+            for skill in skills
+            if ElementType.POWER in skill.costs.keys()
         ),
         weapon_type=_WEAPON_TYPE_MAP[config["weapon"]],
     )
@@ -183,8 +181,7 @@ def generate_character_cards_and_skills():
 
 def parse_sub_command(sub_command: str):
     for skill_type, regexp in _DEFAULT_SKILL_REGEXPS.items():
-        results = re.findall(regexp, sub_command)
-        if results:
+        if results := re.findall(regexp, sub_command):
             return [skill_type, results]
     return [sub_command]
 
@@ -196,14 +193,12 @@ def parse_skill_text(text: str):
 
     effects = []
     for command in text.split("."):
-        command = command.strip()
-        if not command:
-            continue
-
-        # A command is parsable if all of its sub-commands are parsable
-        for sub_command in command.split(", "):
-            effects.append(parse_sub_command(sub_command))
-
+        if command := command.strip():
+                    # A command is parsable if all of its sub-commands are parsable
+            effects.extend(
+                parse_sub_command(sub_command)
+                for sub_command in command.split(", ")
+            )
     return effects
 
 

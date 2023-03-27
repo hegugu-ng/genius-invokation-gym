@@ -54,7 +54,6 @@ if __name__ == "__main__":
         weapon = {}
         talent = {}
         artifact = {}
-        cards = active_player_info.hand_cards
         pos = active_player_info.active_character_position
         if pos.value is not None:
             ch = active_player_info.characters[pos.value].character
@@ -67,7 +66,7 @@ if __name__ == "__main__":
         action_type = str(type(action)).strip(">'").split(".")[-1]
         print(f"{active_player}")
         print(f"    Current Dice: {dice}")
-        if cards:
+        if cards := active_player_info.hand_cards:
             print(f"    Current Cards: {cards}")
         if ch is not None:
             print(
@@ -86,20 +85,19 @@ if __name__ == "__main__":
                 f"        Artifact: {artifact['name']}, active: {artifact['active']}, triggered times: {artifact['triggered_in_a_round']}"
             )
         if len(ch_status_list) >= 1:
-            print(f"        Character Status:")
+            print("        Character Status:")
             for status in ch_status_list:
                 print(
                     f"            {status['name']}, active: {status['active']}, remaining round: {status['remaining_round']}, remaining usage: {status['remaining_usage']}"
                 )
         if summons:
-            print(f"    Current Summons:")
+            print("    Current Summons:")
             for summon in summons:
                 print(f"          {summon['name']}: usages: {summon['usages']}")
 
         print(f"\n    {action_type}: {action.dict()}")
         print("\n")
-        valid = game.judge_action(action)
-        if valid:
+        if valid := game.judge_action(action):
             game.step(action)
             game_info = game.encode_game_info()
             if game_info.status == GameStatus.ENDED:
@@ -113,6 +111,6 @@ if __name__ == "__main__":
             break
 
     if winner is PlayerID.SPECTATOR:
-        print(f"The game is a draw")
+        print("The game is a draw")
     else:
         print(f"The winner is {winner}")

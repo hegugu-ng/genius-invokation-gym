@@ -153,7 +153,7 @@ class CharacterEntity(Entity):
                 if self.position == msg.target[1]:
                     self.active = True
                     updated = True
-                elif self.position != msg.target[1] and self.active:
+                elif self.active:
                     self.active = False
                     updated = True
 
@@ -162,7 +162,7 @@ class CharacterEntity(Entity):
             for idx, (target_id, target_pos, element_type, dmg_val) in enumerate(
                 msg.targets
             ):
-                if not self.player_id == target_id:
+                if self.player_id != target_id:
                     continue
                 if self.active and target_pos == CharPos.ACTIVE:
                     # Modify the target position of the message to the correct character. In case the active character changed due to character death.
@@ -174,9 +174,6 @@ class CharacterEntity(Entity):
                 ):
                     if self.elemental_attachment == ElementType.NONE:
                         self.elemental_attachment = element_type
-                    else:
-                        # TODO: add elemental reaction effects
-                        pass
                     self.health_point -= min(self.health_point, dmg_val)
                     if self.health_point == 0:
                         self.alive = False
