@@ -213,7 +213,7 @@ class ShieldStatus(CombatStatusEntity):
                         f"    Combat Status Effect By {self.player_id.name}:\n        {self.name}:{self.description}\n        Origin DMG: {element_type.name} -> {dmg_val} - {1}\n"
                     )
                     after_dmg = max(0, dmg_val - self.remaining_round)
-                    # 护盾只能抵消伤害，该挂元素还是得挂元素
+                    # 护盾只能抵消伤害，改挂元素还是得挂元素
 
                     top_msg.targets[idx] = (
                         target_id,
