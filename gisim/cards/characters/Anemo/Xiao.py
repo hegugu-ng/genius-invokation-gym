@@ -5,7 +5,7 @@ from typing import cast
 from gisim.cards.characters.base import CharacterCard, CharacterSkill, GenericSkill
 from gisim.classes.enums import ElementType, Nation, SkillType, StatusType, WeaponType
 from gisim.classes.message import DealDamageMsg
-from gisim.status import CharacterStatusEntity
+from gisim.classes.status import CharacterStatusEntity
 
 
 class WhirlwindThrust(GenericSkill):
@@ -56,7 +56,6 @@ class YakshasMask(CharacterStatusEntity):
 
     name: str = "Yakshas Mask"
     element: ElementType = ElementType.ANEMO
-    status_type: StatusType = StatusType.ATTACK_BUFF
     description: str = """The character to which this is attached has their Physical DMG dealt converted to Pyro DMG, and they will deal +1 Pyro DMG.Some times can Apply [Blood Blossom].Duration (Rounds): 2"""
     value: int = 0
     active: bool = True

@@ -5,8 +5,8 @@ from typing import cast
 from gisim.cards.characters.base import CharacterCard, CharacterSkill, GenericSkill
 from gisim.classes.enums import ElementType, Nation, SkillType, StatusType, WeaponType
 from gisim.classes.message import DealDamageMsg
+from gisim.classes.status import CharacterStatusEntity
 from gisim.classes.summon import AttackSummon
-from gisim.status import CharacterStatusEntity
 
 
 class FavoniusBladeworkEdel(GenericSkill):
@@ -38,7 +38,6 @@ class IcetideVortex(GenericSkill):
 class Grimheart(CharacterStatusEntity):
     name: str = "Grimheart"
     element: ElementType = ElementType.CRYO
-    status_type: StatusType = StatusType.ATTACK_BUFF
     description: str = """After the character to which this is attached uses Icetide Vortex: Remove this status, DMG +2 for this instance."""
     value: int = 0
     active: bool = True
