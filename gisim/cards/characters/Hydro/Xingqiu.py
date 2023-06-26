@@ -2,7 +2,7 @@
 from queue import PriorityQueue
 from typing import cast
 
-from classes.message import AfterUsingSkillMsg, DealDamageMsg
+from gisim.classes.message import AfterUsingSkillMsg, DealDamageMsg
 
 from gisim.cards.characters.base import CharacterCard, CharacterSkill, GenericSkill
 from gisim.classes.enums import (

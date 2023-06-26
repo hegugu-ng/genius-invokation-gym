@@ -95,14 +95,14 @@ class DendroCoreStatus(CombatStatusEntity):
 
 class CatalyzingFieldStatus(CombatStatusEntity):
     """[Combat Status]When you deal Icon TCG ElectroElectro DMG or Icon TCG DendroDendro DMG to an opposing active character,
-    DMG dealt +1. (3 Usages)"""
+    DMG dealt +1. (2 Usages)"""
 
     name: str = "Catalyzing Field"
     description: str = """When you deal Icon TCG ElectroElectro DMG or Icon TCG DendroDendro DMG to an opposing active character, DMG dealt +1. (2 Usages)"""
     active: bool = True
     value: int = 0
     remaining_round: int = INF_INT
-    remaining_usage: int = 3
+    remaining_usage: int = 2
 
     def msg_handler(self, msg_queue: PriorityQueue) -> bool:
         top_msg = msg_queue.queue[0]
@@ -123,7 +123,7 @@ class CatalyzingFieldStatus(CombatStatusEntity):
                             element_type,
                             dmg_val + 1,
                         )
-                    self.remaining_usage -= 1
+                        self.remaining_usage -= 1
 
             if self.remaining_usage == 0 or self.remaining_round == 0:
                 self.active = False
